@@ -28,18 +28,18 @@ enum CommandType {
     case call
 }
 
-enum Arithmetic: String {
-    case add = "add"
-    case sub = "sub"
-    case neg = "neg"
-    case eq = "eq"
-    case gt = "gt"
-    case lt = "lt"
-    case and = "and"
-    case or = "or"
-    case not = "not"
+enum Arithmetic {
+    case add
+    case sub
+    case neg
+    case eq(Int)
+    case gt(Int)
+    case lt(Int)
+    case and
+    case or
+    case not
     
-    init?(name: String, index: Int?) {
+    init?(name: String, index: Int) {
         switch name {
         case "add":
             self = .add
@@ -48,11 +48,11 @@ enum Arithmetic: String {
         case "neg":
             self = .neg
         case "eq":
-            self = .eq
+            self = .eq(index)
         case "gt":
-            self = .gt
+            self = .gt(index)
         case "lt":
-            self = .lt
+            self = .lt(index)
         case "and":
             self = .and
         case "or":
@@ -88,23 +88,23 @@ enum Arithmetic: String {
             A=M-1
             M=-M
             """
-        case .eq:
+        case .eq(let index):
             return """
             @SP
             AM=M-1
             D=M
             A=A-1
             D=M-D
-            @
+            @EQ.\(index).TRUE
             D;JEQ
             M=0
-            @
+            @EQ.\(index).END
             0;JMP
-            ()
+            (EQ.\(index).TRUE)
             M=-1
-            ()
+            (EQ.\(index).END)
             """
-        case .gt:
+        case .gt(let index):
             return """
             @SP
             AM=M-1
@@ -120,7 +120,7 @@ enum Arithmetic: String {
             M=-1
             ()
             """
-        case .lt:
+        case .lt(let index):
             return """
             @SP
             AM=M-1

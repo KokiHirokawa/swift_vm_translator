@@ -32,6 +32,9 @@ class Parser {
     }
     
     func parse() {
+        
+        var lineCount = 0
+        
         for line in inputCode.components(separatedBy: .newlines) {
             self.instruction = line
             
@@ -50,7 +53,7 @@ class Parser {
                     }
                     let command = instruction[commandRange]
                     
-                    guard let arithmeticType = Arithmetic(rawValue: command) else { return }
+                    guard let arithmeticType = Arithmetic(name: command, index: lineCount) else { return }
                     let output = arithmeticType.parse()
                     outputCode += output
                     outputCode += "\n"
@@ -71,6 +74,9 @@ class Parser {
                 default:
                     break
                 }
+                
+                lineCount += 1
+                
             } catch {
                 print("error!")
             }
@@ -78,7 +84,8 @@ class Parser {
     }
     
     func output() {
-        print(outputCode)
+        let data = outputCode.data(using: .ascii)
+        fileManager.createFile(atPath: "\(filename).asm", contents: data)
     }
 }
 
