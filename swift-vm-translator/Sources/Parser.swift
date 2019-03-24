@@ -12,6 +12,7 @@ class Parser {
     
     private let fileManager = FileManager.default
     private var inputCode = ""
+    private var outputCode = ""
     private var filename = ""
     private var instruction = ""
     
@@ -51,14 +52,11 @@ class Parser {
                     
                     guard let arithmeticType = Arithmetic(rawValue: command) else { return }
                     let output = arithmeticType.parse()
-                    // commandを抽出する正規表現処理
-                    // 抽出したコマンドに対応するenumを作成する
-                    // parse()をつかってアセンブラを返す
-                    break
+                    outputCode += output
+                    outputCode += "\n"
                 case .push:
-                    // 一旦来るものは全てconstantとして処理する
-                    let index = 10
-                    // index部分を抽出する
+                    guard let indexMatch = instruction.firstMatch(pattern: RegExpPattern.push), let indexRange = indexMatch[2] else { return }
+                    let index = instruction[indexRange]
                     let output = """
                     @\(index)
                     D=A
@@ -68,7 +66,8 @@ class Parser {
                     @SP
                     M=M+1
                     """
-                    break
+                    outputCode += output
+                    outputCode += "\n"
                 default:
                     break
                 }
@@ -79,7 +78,7 @@ class Parser {
     }
     
     func output() {
-        
+        print(outputCode)
     }
 }
 

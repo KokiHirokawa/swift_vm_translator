@@ -39,6 +39,31 @@ enum Arithmetic: String {
     case or = "or"
     case not = "not"
     
+    init?(name: String, index: Int?) {
+        switch name {
+        case "add":
+            self = .add
+        case "sub":
+            self = .sub
+        case "neg":
+            self = .neg
+        case "eq":
+            self = .eq
+        case "gt":
+            self = .gt
+        case "lt":
+            self = .lt
+        case "and":
+            self = .and
+        case "or":
+            self = .or
+        case "not":
+            self = .not
+        default:
+            return nil
+        }
+    }
+    
     func parse() -> String {
         switch self {
         case .add:
