@@ -97,10 +97,14 @@ enum Arithmetic {
             D=M-D
             @EQ.\(index).TRUE
             D;JEQ
+            @SP
+            A=M-1
             M=0
             @EQ.\(index).END
             0;JMP
             (EQ.\(index).TRUE)
+            @SP
+            A=M-1
             M=-1
             (EQ.\(index).END)
             """
@@ -111,14 +115,18 @@ enum Arithmetic {
             D=M
             A=A-1
             D=M-D
-            @
+            @EQ.\(index).TRUE
             D;JGT
+            @SP
+            A=M-1
             M=0
-            @
+            @EQ.\(index).END
             0;JMP
-            ()
+            (EQ.\(index).TRUE)
+            @SP
+            A=M-1
             M=-1
-            ()
+            (EQ.\(index).END)
             """
         case .lt(let index):
             return """
@@ -127,14 +135,18 @@ enum Arithmetic {
             D=M
             A=A-1
             D=M-D
-            @
+            @EQ.\(index).TRUE
             D;JLT
+            @SP
+            A=M-1
             M=0
-            @
+            @EQ.\(index).END
             0;JMP
-            ()
+            (EQ.\(index).TRUE)
+            @SP
+            A=M-1
             M=-1
-            ()
+            (EQ.\(index).END)
             """
         case .and:
             return """
