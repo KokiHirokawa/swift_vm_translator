@@ -8,6 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		069E413A2244D0B000C2CB01 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069E41392244D0B000C2CB01 /* main.swift */; };
+		069E41462247231C00C2CB01 /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069E41452247231C00C2CB01 /* Parser.swift */; };
+		069E41482247232900C2CB01 /* RegExpPattern.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069E41472247232900C2CB01 /* RegExpPattern.swift */; };
+		069E414A2247233F00C2CB01 /* CommandType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069E41492247233F00C2CB01 /* CommandType.swift */; };
+		069E414C2247235200C2CB01 /* StackArithmetic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069E414B2247235200C2CB01 /* StackArithmetic.swift */; };
+		069E414E2247235D00C2CB01 /* MemoryAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069E414D2247235D00C2CB01 /* MemoryAccess.swift */; };
+		069E415222472F9600C2CB01 /* String+RegularExpression.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069E415122472F9600C2CB01 /* String+RegularExpression.swift */; };
+		069E415422472FD000C2CB01 /* String+subscript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069E415322472FD000C2CB01 /* String+subscript.swift */; };
+		069E41562247300200C2CB01 /* NSTextCheckingResult+subscript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069E41552247300200C2CB01 /* NSTextCheckingResult+subscript.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +33,14 @@
 /* Begin PBXFileReference section */
 		069E41362244D0B000C2CB01 /* swift-vm-translator */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "swift-vm-translator"; sourceTree = BUILT_PRODUCTS_DIR; };
 		069E41392244D0B000C2CB01 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		069E41452247231C00C2CB01 /* Parser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parser.swift; sourceTree = "<group>"; };
+		069E41472247232900C2CB01 /* RegExpPattern.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegExpPattern.swift; sourceTree = "<group>"; };
+		069E41492247233F00C2CB01 /* CommandType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandType.swift; sourceTree = "<group>"; };
+		069E414B2247235200C2CB01 /* StackArithmetic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackArithmetic.swift; sourceTree = "<group>"; };
+		069E414D2247235D00C2CB01 /* MemoryAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryAccess.swift; sourceTree = "<group>"; };
+		069E415122472F9600C2CB01 /* String+RegularExpression.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+RegularExpression.swift"; sourceTree = "<group>"; };
+		069E415322472FD000C2CB01 /* String+subscript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+subscript.swift"; sourceTree = "<group>"; };
+		069E41552247300200C2CB01 /* NSTextCheckingResult+subscript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSTextCheckingResult+subscript.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,8 +74,32 @@
 			isa = PBXGroup;
 			children = (
 				069E41392244D0B000C2CB01 /* main.swift */,
+				069E414F22472F3000C2CB01 /* Sources */,
+				069E415022472F4200C2CB01 /* Extensions */,
 			);
 			path = "swift-vm-translator";
+			sourceTree = "<group>";
+		};
+		069E414F22472F3000C2CB01 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				069E41452247231C00C2CB01 /* Parser.swift */,
+				069E41472247232900C2CB01 /* RegExpPattern.swift */,
+				069E41492247233F00C2CB01 /* CommandType.swift */,
+				069E414B2247235200C2CB01 /* StackArithmetic.swift */,
+				069E414D2247235D00C2CB01 /* MemoryAccess.swift */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		069E415022472F4200C2CB01 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				069E415122472F9600C2CB01 /* String+RegularExpression.swift */,
+				069E415322472FD000C2CB01 /* String+subscript.swift */,
+				069E41552247300200C2CB01 /* NSTextCheckingResult+subscript.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -119,7 +159,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				069E415222472F9600C2CB01 /* String+RegularExpression.swift in Sources */,
+				069E41482247232900C2CB01 /* RegExpPattern.swift in Sources */,
+				069E415422472FD000C2CB01 /* String+subscript.swift in Sources */,
+				069E414A2247233F00C2CB01 /* CommandType.swift in Sources */,
+				069E414E2247235D00C2CB01 /* MemoryAccess.swift in Sources */,
+				069E414C2247235200C2CB01 /* StackArithmetic.swift in Sources */,
+				069E41462247231C00C2CB01 /* Parser.swift in Sources */,
 				069E413A2244D0B000C2CB01 /* main.swift in Sources */,
+				069E41562247300200C2CB01 /* NSTextCheckingResult+subscript.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

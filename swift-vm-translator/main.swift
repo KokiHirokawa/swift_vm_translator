@@ -8,5 +8,19 @@
 
 import Foundation
 
-print("Hello, World!")
+func run() {
+    
+    guard CommandLine.argc == 2 else {
+        print("usage: vmt [filename]")
+        return
+    }
+    
+    let args = CommandLine.arguments
+    let filepath = args[1]
+    let parser = Parser(path: filepath)
+    parser.parse()
+    parser.output()
+}
+
+run()
 

@@ -83,15 +83,15 @@ or
   - 使用しないメモリ空間
 
 ## レジスタ
-- RAM[0](SP)
+- RAM[0]=SP
   - スタックポインタ：スタックの最上位の次を指す
-- RAM[1](LCL)
+- RAM[1]=LCL
   - localセグメントのベースアドレスを指す
-- RAM[2](ARG)
+- RAM[2]=ARG
   - argumentセグメントのベースアドレスを指す
-- RAM[3](THIS)
+- RAM[3]=THIS
   - thisセグメントのベースアドレスを指す
-- RAM[4](THAT)
+- RAM[4]=THAT
   - thatセグメントのベースアドレスを指す
 - RAM[5-12]
   - tempセグメントの値を保持する
