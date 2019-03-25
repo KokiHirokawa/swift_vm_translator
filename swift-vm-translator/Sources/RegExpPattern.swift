@@ -51,69 +51,46 @@ enum ComparisonFunction {
         }
     }
     
-    func parse() -> String {
+    func index() -> Int {
         switch self {
-        case .eq(let index):
-            return """
-            @SP
-            AM=M-1
-            D=M
-            A=A-1
-            D=M-D
-            @EQ.\(index).TRUE
-            D;JEQ
-            @SP
-            A=M-1
-            M=0
-            @EQ.\(index).END
-            0;JMP
-            (EQ.\(index).TRUE)
-            @SP
-            A=M-1
-            M=-1
-            (EQ.\(index).END)
-            """
-        case .gt(let index):
-            return """
-            @SP
-            AM=M-1
-            D=M
-            A=A-1
-            D=M-D
-            @EQ.\(index).TRUE
-            D;JGT
-            @SP
-            A=M-1
-            M=0
-            @EQ.\(index).END
-            0;JMP
-            (EQ.\(index).TRUE)
-            @SP
-            A=M-1
-            M=-1
-            (EQ.\(index).END)
-            """
-        case .lt(let index):
-            return """
-            @SP
-            AM=M-1
-            D=M
-            A=A-1
-            D=M-D
-            @EQ.\(index).TRUE
-            D;JLT
-            @SP
-            A=M-1
-            M=0
-            @EQ.\(index).END
-            0;JMP
-            (EQ.\(index).TRUE)
-            @SP
-            A=M-1
-            M=-1
-            (EQ.\(index).END)
-            """
+        case .eq(let index), .gt(let index), .lt(let index):
+            return index
         }
+    }
+    
+    func parse() -> String {
+        var output = """
+            @SP
+            AM=M-1
+            D=M
+            A=A-1
+            D=M-D
+            @EQ.\(index()).TRUE
+
+            """
+        
+        switch self {
+        case .eq:
+            output += "D;JEQ\n"
+        case .gt:
+            output += "D;JGT\n"
+        case .lt:
+            output += "D;JLT\n"
+        }
+        
+        output += """
+            @SP
+            A=M-1
+            M=0
+            @EQ.\(index()).END
+            0;JMP
+            (EQ.\(index()).TRUE)
+            @SP
+            A=M-1
+            M=-1
+            (EQ.\(index()).END)
+            """
+        return output
     }
 }
 
@@ -167,4 +144,12 @@ enum BinaryFunction: String {
         
         return output
     }
+}
+
+enum Push {
+    
+}
+
+enum Pop {
+    
 }
