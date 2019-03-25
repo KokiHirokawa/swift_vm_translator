@@ -6,18 +6,23 @@
 //  Copyright © 2019 KokiHirokawa. All rights reserved.
 //
 
-struct RegExpPattern {
+struct CommandPattern {
     public static let commentOut = "/{2}.*"
-    public static let arithmetic = "^(add|sub|neg|eq|gt|lt|and|or|not)$"
+    
+    public static let unaryFunction = "^(neg|not)$"
+    public static let binaryFunction = "^(add|sub|and|or)$"
+    public static let comparisonFunction = "^(eq|gt|lt)$"
     public static let push = "^push[\\s]+([\\w]+)[\\s]+([\\w]+)"
     public static let pop = "^pop[\\s]+([\\w]+)[\\s]+([\\w]+)"
     
+    // FIXME: filenameが取れるように正規表現の修正
     public static let filePath = "(.*)\\.vm$"
-    
 }
 
 enum CommandType {
-    case arithmetic
+    case unaryFunction
+    case binaryFunction
+    case comparisonFunction
     case push
     case pop
     case label
@@ -28,37 +33,19 @@ enum CommandType {
     case call
 }
 
-enum Arithmetic {
-    case add
-    case sub
-    case neg
+enum ComparisonFunction {
     case eq(Int)
     case gt(Int)
     case lt(Int)
-    case and
-    case or
-    case not
     
     init?(name: String, index: Int) {
         switch name {
-        case "add":
-            self = .add
-        case "sub":
-            self = .sub
-        case "neg":
-            self = .neg
         case "eq":
             self = .eq(index)
         case "gt":
             self = .gt(index)
         case "lt":
             self = .lt(index)
-        case "and":
-            self = .and
-        case "or":
-            self = .or
-        case "not":
-            self = .not
         default:
             return nil
         }
@@ -66,28 +53,6 @@ enum Arithmetic {
     
     func parse() -> String {
         switch self {
-        case .add:
-            return """
-            @SP
-            AM=M-1
-            D=M
-            A=A-1
-            M=D+M
-            """
-        case .sub:
-            return """
-            @SP
-            AM=M-1
-            D=M
-            A=A-1
-            M=M-D
-            """
-        case .neg:
-            return """
-            @SP
-            A=M-1
-            M=-M
-            """
         case .eq(let index):
             return """
             @SP
@@ -148,28 +113,58 @@ enum Arithmetic {
             M=-1
             (EQ.\(index).END)
             """
-        case .and:
-            return """
-            @SP
-            AM=M-1
-            D=M
-            A=A-1
-            M=D&M
-            """
-        case .or:
-            return """
-            @SP
-            AM=M-1
-            D=M
-            A=A-1
-            M=D|M
-            """
-        case .not:
-            return """
+        }
+    }
+}
+
+enum UnaryFunction: String {
+    case neg = "neg"
+    case not = "not"
+    
+    func parse() -> String {
+        var output = """
             @SP
             A=M-1
-            M=!M
+
             """
+        
+        switch self {
+        case .neg:
+            output += "M=-M"
+        case .not:
+            output += "M=!M"
         }
+        
+        return output
+    }
+}
+
+enum BinaryFunction: String {
+    case add = "add"
+    case sub = "sub"
+    case and = "and"
+    case or = "or"
+    
+    func parse() -> String {
+        var output = """
+            @SP
+            AM=M-1
+            D=M
+            A=A-1
+
+            """
+        
+        switch self {
+        case .add:
+            output += "M=D+M"
+        case .sub:
+            output += "M=M-D"
+        case .and:
+            output += "M=D&M"
+        case .or:
+            output += "M=D|M"
+        }
+        
+        return output
     }
 }

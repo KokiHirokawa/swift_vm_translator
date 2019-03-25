@@ -24,7 +24,7 @@ class Parser {
         
         self.inputCode = inputCode
         
-        guard let pathMatch = path.firstMatch(pattern: RegExpPattern.filePath), let filenameRange = pathMatch[1] else {
+        guard let pathMatch = path.firstMatch(pattern: CommandPattern.filePath), let filenameRange = pathMatch[1] else {
             print("please pass *.asm file.")
             return
         }
@@ -38,7 +38,7 @@ class Parser {
         for line in inputCode.components(separatedBy: .newlines) {
             self.instruction = line
             
-            let commentOutRegExp = try! NSRegularExpression(pattern: RegExpPattern.commentOut)
+            let commentOutRegExp = try! NSRegularExpression(pattern: CommandPattern.commentOut)
             instruction = commentOutRegExp.stringByReplacingMatches(in: instruction, range: NSMakeRange(0, instruction.count), withTemplate: "")
             instruction = instruction.trimmingCharacters(in: .whitespaces)
             
@@ -48,17 +48,34 @@ class Parser {
                 let type = try commnadType()
                 var output = ""
                 
+                // FIXME: so dirty...
                 switch type {
-                case .arithmetic:
-                    guard let arithmeticMatch = instruction.firstMatch(pattern: RegExpPattern.arithmetic), let commandRange = arithmeticMatch[1] else {
+                case .unaryFunction:
+                    guard let match = instruction.firstMatch(pattern: CommandPattern.unaryFunction), let commandRange = match[1] else {
                         return
                     }
                     let command = instruction[commandRange]
                     
-                    guard let arithmeticType = Arithmetic(name: command, index: lineCount) else { return }
-                    output = arithmeticType.parse()
+                    guard let commandType = UnaryFunction(rawValue: command) else { return }
+                    output = commandType.parse()
+                case .binaryFunction:
+                    guard let match = instruction.firstMatch(pattern: CommandPattern.binaryFunction), let commandRange = match[1] else {
+                        return
+                    }
+                    let command = instruction[commandRange]
+                    
+                    guard let commandType = BinaryFunction(rawValue: command) else { return }
+                    output = commandType.parse()
+                case .comparisonFunction:
+                    guard let match = instruction.firstMatch(pattern: CommandPattern.comparisonFunction), let commandRange = match[1] else {
+                        return
+                    }
+                    let command = instruction[commandRange]
+                    
+                    guard let commandType = ComparisonFunction(name: command, index: lineCount) else { return }
+                    output = commandType.parse()
                 case .push:
-                    guard let pushMatch = instruction.firstMatch(pattern: RegExpPattern.push), let segmentRange = pushMatch[1], let indexRange = pushMatch[2] else { return }
+                    guard let pushMatch = instruction.firstMatch(pattern: CommandPattern.push), let segmentRange = pushMatch[1], let indexRange = pushMatch[2] else { return }
                     let segment = instruction[segmentRange]
                     let index = instruction[indexRange]
                     
@@ -166,7 +183,7 @@ class Parser {
                         break
                     }
                 case .pop:
-                    guard let popMatch = instruction.firstMatch(pattern: RegExpPattern.pop), let segmentRange = popMatch[1], let indexRange = popMatch[2] else { return }
+                    guard let popMatch = instruction.firstMatch(pattern: CommandPattern.pop), let segmentRange = popMatch[1], let indexRange = popMatch[2] else { return }
                     let segment = instruction[segmentRange]
                     let index = instruction[indexRange]
                     
@@ -298,11 +315,15 @@ extension Parser {
     
     func commnadType() throws -> CommandType {
         
-        if instruction.isMatch(pattern: RegExpPattern.arithmetic) {
-            return .arithmetic
-        } else if instruction.isMatch(pattern: RegExpPattern.push) {
+        if instruction.isMatch(pattern: CommandPattern.unaryFunction) {
+            return .unaryFunction
+        } else if instruction.isMatch(pattern: CommandPattern.binaryFunction) {
+            return .binaryFunction
+        } else if instruction.isMatch(pattern: CommandPattern.comparisonFunction) {
+            return .comparisonFunction
+        } else if instruction.isMatch(pattern: CommandPattern.push) {
             return .push
-        } else if instruction.isMatch(pattern: RegExpPattern.pop) {
+        } else if instruction.isMatch(pattern: CommandPattern.pop) {
             return .pop
         } else {
             throw ParseError.illegalInstruction("不正なコマンドが含まれています")
