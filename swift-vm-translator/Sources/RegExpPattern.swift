@@ -12,11 +12,11 @@ struct CommandPattern {
     public static let unaryFunction = "^(neg|not)$"
     public static let binaryFunction = "^(add|sub|and|or)$"
     public static let comparisonFunction = "^(eq|gt|lt)$"
-    public static let push = "^push[\\s]+([\\w]+)[\\s]+([\\w]+)"
-    public static let pop = "^pop[\\s]+([\\w]+)[\\s]+([\\w]+)"
+    // segmentを分割してグループ分けすればパースコードが短くなるはず…
+    public static let push = "^push[\\s]+(constant|local|argument|this|that|pointer|temp|static)[\\s]+([\\w]+)"
+    public static let pop = "^pop[\\s]+(local|argument|this|that|pointer|temp|static)[\\s]+([\\w]+)"
     
-    // FIXME: filenameが取れるように正規表現の修正
-    public static let filePath = "(.*)\\.vm$"
+    public static let filePath = "((.*/)*(.*))\\.vm$"
 }
 
 enum CommandType {
@@ -146,10 +146,23 @@ enum BinaryFunction: String {
     }
 }
 
-enum Push {
-    
+enum Push: String {
+    case constant = "constant"
+    case local = "local"
+    case argument = "argument"
+    case this = "this"
+    case that = "that"
+    case pointer = "pointer"
+    case temp = "temp"
+    case `static` = "static"
 }
 
-enum Pop {
-    
+enum Pop: String {
+    case local = "local"
+    case argument = "argument"
+    case this = "this"
+    case that = "that"
+    case pointer = "pointer"
+    case temp = "temp"
+    case `static` = "static"
 }
