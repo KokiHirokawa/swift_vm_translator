@@ -13,8 +13,14 @@ struct CommandPattern {
     public static let binaryFunction = "^(add|sub|and|or)$"
     public static let comparisonFunction = "^(eq|gt|lt)$"
     // segmentを分割してグループ分けすればパースコードが短くなるはず…
-    public static let push = "^push[\\s]+(constant|local|argument|this|that|pointer|temp|static)[\\s]+([\\w]+)"
-    public static let pop = "^pop[\\s]+(local|argument|this|that|pointer|temp|static)[\\s]+([\\w]+)"
+    public static let push = "^push[\\s]+(constant|local|argument|this|that|pointer|temp|static)[\\s]+([\\w]+)$"
+    public static let pop = "^pop[\\s]+(local|argument|this|that|pointer|temp|static)[\\s]+([\\w]+)$"
+    public static let label = #"^label\s+([\w\._:]+)$"#
+    public static let goto = #"^goto\s+([\w\._:]+)$"#
+    public static let ifGoto = #"^if-goto\s+([\w\._:]+)$"#
+    public static let function = #"^function\s+([\w\._:]+)\s+(\d+)$"#
+    public static let call = #"^call\s+([\w\._:]+)\s+(\d+)$"#
+    public static let callReturn = "^return$"
     
     public static let filePath = "((.*/)*(.*))\\.vm$"
 }
@@ -27,10 +33,10 @@ enum CommandType {
     case pop
     case label
     case goto
-    case `if`
+    case ifGoto
     case function
-    case `return`
     case call
+    case callReturn
 }
 
 enum ComparisonFunction {

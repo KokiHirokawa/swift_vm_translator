@@ -60,17 +60,17 @@ class Parser {
                 case .pop:
                     output = parsePop()
                 case .label:
-                    break
+                    output = parseLabel()
                 case .goto:
-                    break
-                case .if:
-                    break
+                    output = parseGoto()
+                case .ifGoto:
+                    output = parseIfGoto()
                 case .function:
-                    break
-                case .return:
-                    break
+                    output = parseFunction()
                 case .call:
-                    break
+                    output = parseCall()
+                case .callReturn:
+                    output = parseCallReturn()
                 }
                 
                 outputCode += output
@@ -104,6 +104,18 @@ extension Parser {
             return .push
         } else if instruction.isMatch(pattern: CommandPattern.pop) {
             return .pop
+        } else if instruction.isMatch(pattern: CommandPattern.label) {
+            return .label
+        } else if instruction.isMatch(pattern: CommandPattern.goto) {
+            return .goto
+        } else if instruction.isMatch(pattern: CommandPattern.ifGoto) {
+            return .ifGoto
+        } else if instruction.isMatch(pattern: CommandPattern.function) {
+            return .function
+        } else if instruction.isMatch(pattern: CommandPattern.call) {
+            return .call
+        } else if instruction.isMatch(pattern: CommandPattern.callReturn) {
+            return .callReturn
         } else {
             throw ParseError.illegalInstruction("不正なコマンドが含まれています")
         }
@@ -232,7 +244,6 @@ extension Parser {
             M=M+1
             """
         case .static:
-            
             return """
             @\(inputfile.name).\(index)
             D=M
@@ -352,6 +363,161 @@ extension Parser {
             M=D
             """
         }
+    }
+    
+    func parseLabel() -> String {
+        let match = instruction.firstMatch(pattern: CommandPattern.label)!
+        let labelName = instruction[match[1]!]
+        return "(\(labelName))"
+    }
+    
+    func parseGoto() -> String {
+        let match = instruction.firstMatch(pattern: CommandPattern.goto)!
+        let labelName = instruction[match[1]!]
+        return """
+        @\(labelName)
+        0;JMP
+        """
+    }
+    
+    func parseIfGoto() -> String {
+        let match = instruction.firstMatch(pattern: CommandPattern.ifGoto)!
+        let labelName = instruction[match[1]!]
+        return """
+        @SP
+        AM=M-1
+        D=M
+        @\(labelName)
+        D;JNE
+        """
+    }
+    
+    func parseCall() -> String {
+        let match = instruction.firstMatch(pattern: CommandPattern.call)!
+        let functionName = instruction[match[1]!]
+        let argc = instruction[match[2]!]
+        return """
+        @\(functionName)_RA
+        D=M
+        @SP
+        A=M
+        M=D
+        @SP
+        M=M+1
+        @LCL
+        D=M
+        @SP
+        A=M
+        M=D
+        @SP
+        M=M+1
+        @ARG
+        D=M
+        @SP
+        A=M
+        M=D
+        @SP
+        M=M+1
+        @THIS
+        D=M
+        @SP
+        A=M
+        M=D
+        @SP
+        M=M+1
+        @THAT
+        D=M
+        @SP
+        A=M
+        M=D
+        @SP
+        M=M+1
+        @\(argc)
+        D=A
+        @5
+        D=D+A
+        @SP
+        D=M-D
+        @ARG
+        A=M
+        M=D
+        @SP
+        D=M
+        @LCL
+        M=D
+        @\(functionName)
+        0;JMP
+        (\(functionName)_RA)
+        """
+    }
+    
+    func parseFunction() -> String {
+        let match = instruction.firstMatch(pattern: CommandPattern.function)!
+        let functionName = instruction[match[1]!]
+        let lclc = instruction[match[2]!]
+        
+        var output = "(\(functionName))"
+        for _ in 0..<Int(lclc)! {
+            output += "\n"
+            output += """
+            @0
+            D=A
+            @SP
+            A=M
+            M=D
+            @SP
+            M=M+1
+            """
+        }
+        return output
+    }
+    
+    func parseCallReturn() -> String {
+        return """
+        @LCL
+        D=M
+        @R13
+        M=D
+        @5
+        D=A
+        @R13
+        D=M-D
+        @R14
+        M=D
+        @SP
+        A=M-1
+        D=M
+        @ARG
+        A=M
+        M=D
+        @ARG
+        D=M+1
+        @SP
+        M=D
+        @R13
+        AM=M-1
+        D=M
+        @THAT
+        M=D
+        @R13
+        AM=M-1
+        D=M
+        @THIS
+        M=D
+        @R13
+        AM=M-1
+        D=M
+        @ARG
+        M=D
+        @R13
+        AM=M-1
+        D=M
+        @LCL
+        M=D
+        @R14
+        A=M
+        0;JMP
+        """
     }
 }
 
