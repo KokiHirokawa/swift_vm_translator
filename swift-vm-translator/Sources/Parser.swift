@@ -70,7 +70,7 @@ class Parser {
                 case .call:
                     output = parseCall()
                 case .callReturn:
-                    output = parseCallReturn()
+                    output = parseCallReturn(index: lineCount)
                 }
                 
                 outputCode += output
@@ -398,7 +398,7 @@ extension Parser {
         let argc = instruction[match[2]!]
         return """
         @\(functionName)_RA
-        D=M
+        D=A
         @SP
         A=M
         M=D
@@ -439,7 +439,6 @@ extension Parser {
         @SP
         D=M-D
         @ARG
-        A=M
         M=D
         @SP
         D=M
@@ -472,17 +471,18 @@ extension Parser {
         return output
     }
     
-    func parseCallReturn() -> String {
+    func parseCallReturn(index: Int) -> String {
         return """
         @LCL
         D=M
-        @R13
+        @FRAME\(index)
         M=D
         @5
         D=A
-        @R13
-        D=M-D
-        @R14
+        @FRAME\(index)
+        A=M-D
+        D=M
+        @RET\(index)
         M=D
         @SP
         A=M-1
@@ -494,27 +494,27 @@ extension Parser {
         D=M+1
         @SP
         M=D
-        @R13
+        @FRAME\(index)
         AM=M-1
         D=M
         @THAT
         M=D
-        @R13
+        @FRAME\(index)
         AM=M-1
         D=M
         @THIS
         M=D
-        @R13
+        @FRAME\(index)
         AM=M-1
         D=M
         @ARG
         M=D
-        @R13
+        @FRAME\(index)
         AM=M-1
         D=M
         @LCL
         M=D
-        @R14
+        @RET\(index)
         A=M
         0;JMP
         """
