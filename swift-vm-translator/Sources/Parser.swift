@@ -11,82 +11,95 @@ import Foundation
 class Parser {
     
     private let fileManager = FileManager.default
-    private var inputCode = ""
+    private var vmFiles: [String] = []
+    private var parsingFilename = ""
     private var outputCode = ""
     private var inputfile: (path: String, name: String) = ("", "")
     private var instruction = ""
     
     init(path: String) {
-        guard let data = fileManager.contents(atPath: path), let inputCode = String(data: data, encoding: .ascii) else {
-            print("[error] cannot find file.")
+        
+        do {
+            vmFiles = try fileManager.contentsOfDirectory(atPath: path).filter { $0.isMatch(pattern: PathPattern.vmFilePath) }
+            if vmFiles.isEmpty {
+                print("cannot find .vm file.")
+            }
+        } catch {
+            print("please pass directory path.")
             return
         }
         
-        self.inputCode = inputCode
-        
-        guard let pathMatch = path.firstMatch(pattern: CommandPattern.filePath) else {
-            print("please pass *.asm file.")
+        guard let pathMatch = path.firstMatch(pattern: PathPattern.directoryPath) else {
             return
         }
-        self.inputfile = (path[pathMatch[1]!], path[pathMatch[3]!])
+        inputfile = (path[pathMatch[0]!], path[pathMatch[2]!])
     }
     
     func parse() {
         
         var lineCount = 0
+        outputCode += parseBootstrapCode()
         
-        for line in inputCode.components(separatedBy: .newlines) {
-            self.instruction = line
+        for filename in vmFiles {
+            guard let data = fileManager.contents(atPath: inputfile.path + filename),
+                  let inputCode = String(data: data, encoding: .ascii) else {
+                return
+            }
+            parsingFilename = filename
             
-            let commentOutRegExp = try! NSRegularExpression(pattern: CommandPattern.commentOut)
-            instruction = commentOutRegExp.stringByReplacingMatches(in: instruction, range: NSMakeRange(0, instruction.count), withTemplate: "")
-            instruction = instruction.trimmingCharacters(in: .whitespaces)
-            
-            if instruction.isEmpty { continue }
-            
-            do {
-                let type = try commnadType()
-                var output = ""
+            for line in inputCode.components(separatedBy: .newlines) {
+                instruction = line
                 
-                switch type {
-                case .unaryFunction:
-                    output = parseUnaryFunction()
-                case .binaryFunction:
-                    output = parseBinaryFunction()
-                case .comparisonFunction:
-                    output = parseComparisonFunction(index: lineCount)
-                case .push:
-                    output = parsePush()
-                case .pop:
-                    output = parsePop()
-                case .label:
-                    output = parseLabel()
-                case .goto:
-                    output = parseGoto()
-                case .ifGoto:
-                    output = parseIfGoto()
-                case .function:
-                    output = parseFunction()
-                case .call:
-                    output = parseCall()
-                case .callReturn:
-                    output = parseCallReturn(index: lineCount)
+                let commentOutRegExp = try! NSRegularExpression(pattern: CommandPattern.commentOut)
+                instruction = commentOutRegExp.stringByReplacingMatches(in: instruction, range: NSMakeRange(0, instruction.count), withTemplate: "")
+                instruction = instruction.trimmingCharacters(in: .whitespaces)
+                
+                if instruction.isEmpty { continue }
+                
+                do {
+                    let type = try commnadType()
+                    var output = ""
+                    
+                    switch type {
+                    case .unaryFunction:
+                        output = parseUnaryFunction()
+                    case .binaryFunction:
+                        output = parseBinaryFunction()
+                    case .comparisonFunction:
+                        output = parseComparisonFunction(index: lineCount)
+                    case .push:
+                        output = parsePush()
+                    case .pop:
+                        output = parsePop()
+                    case .label:
+                        output = parseLabel()
+                    case .goto:
+                        output = parseGoto()
+                    case .ifGoto:
+                        output = parseIfGoto()
+                    case .function:
+                        output = parseFunction()
+                    case .call:
+                        output = parseCall()
+                    case .callReturn:
+                        output = parseCallReturn(index: lineCount)
+                    }
+                    
+                    outputCode += output
+                    outputCode += "\n"
+                    
+                    lineCount += 1
+                    
+                } catch {
+                    print("error!")
                 }
-                
-                outputCode += output
-                outputCode += "\n"
-                
-                lineCount += 1
-                
-            } catch {
-                print("error!")
             }
         }
     }
     
     func output() {
         let data = outputCode.data(using: .ascii)
-        fileManager.createFile(atPath: "\(inputfile.path).asm", contents: data)
+        fileManager.createFile(atPath: "\(inputfile.path)\(inputfile.name).asm", contents: data)
     }
 }
 
@@ -123,6 +136,19 @@ extension Parser {
 }
 
 extension Parser {
+    
+    func parseBootstrapCode() -> String {
+        var output = """
+            @256
+            D=A
+            @SP
+            M=D
+
+            """
+        output += parseCall(inst: "call Sys.init 0")
+        output += "\n"
+        return output
+    }
     
     func parseUnaryFunction() -> String {
         let match = instruction.firstMatch(pattern: CommandPattern.unaryFunction)!
@@ -245,7 +271,7 @@ extension Parser {
             """
         case .static:
             return """
-            @\(inputfile.name).\(index)
+            @\(parsingFilename).\(index)
             D=M
             @SP
             A=M
@@ -354,12 +380,11 @@ extension Parser {
             M=D
             """
         case .static:
-            // filenameは最後の部分だけ抽出する
             return """
             @SP
             AM=M-1
             D=M
-            @\(inputfile.name).\(index)
+            @\(parsingFilename).\(index)
             M=D
             """
         }
@@ -392,7 +417,8 @@ extension Parser {
         """
     }
     
-    func parseCall() -> String {
+    func parseCall(inst: String? = nil) -> String {
+        let instruction = inst ?? self.instruction
         let match = instruction.firstMatch(pattern: CommandPattern.call)!
         let functionName = instruction[match[1]!]
         let argc = instruction[match[2]!]

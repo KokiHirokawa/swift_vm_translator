@@ -6,13 +6,17 @@
 //  Copyright © 2019 KokiHirokawa. All rights reserved.
 //
 
+struct PathPattern {
+    public static let directoryPath = #"(.*/)*(.*){1}/$"#
+    public static let vmFilePath = #".*\.vm$"#
+}
+
 struct CommandPattern {
     public static let commentOut = "/{2}.*"
     
     public static let unaryFunction = "^(neg|not)$"
     public static let binaryFunction = "^(add|sub|and|or)$"
     public static let comparisonFunction = "^(eq|gt|lt)$"
-    // segmentを分割してグループ分けすればパースコードが短くなるはず…
     public static let push = "^push[\\s]+(constant|local|argument|this|that|pointer|temp|static)[\\s]+([\\w]+)$"
     public static let pop = "^pop[\\s]+(local|argument|this|that|pointer|temp|static)[\\s]+([\\w]+)$"
     public static let label = #"^label\s+([\w\._:]+)$"#
@@ -21,8 +25,6 @@ struct CommandPattern {
     public static let function = #"^function\s+([\w\._:]+)\s+(\d+)$"#
     public static let call = #"^call\s+([\w\._:]+)\s+(\d+)$"#
     public static let callReturn = "^return$"
-    
-    public static let filePath = "((.*/)*(.*))\\.vm$"
 }
 
 enum CommandType {
