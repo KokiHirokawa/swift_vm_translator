@@ -11,6 +11,7 @@ import Foundation
 class Parser {
     
     private let fileManager = FileManager.default
+    
     private var vmFiles: [String] = []
     private var parsingFilename = ""
     private var outputCode = ""
@@ -66,7 +67,7 @@ class Parser {
                     case .binaryFunction:
                         output = parseBinaryFunction()
                     case .comparisonFunction:
-                        output = parseComparisonFunction(index: lineCount)
+                        output = parseComparisonFunction()
                     case .push:
                         output = parsePush()
                     case .pop:
@@ -82,7 +83,7 @@ class Parser {
                     case .call:
                         output = parseCall()
                     case .callReturn:
-                        output = parseCallReturn(index: lineCount)
+                        output = parseCallReturn()
                     }
                     
                     outputCode += output
@@ -166,11 +167,12 @@ extension Parser {
         return commandType.parse()
     }
     
-    func parseComparisonFunction(index: Int) -> String {
+    func parseComparisonFunction() -> String {
         let match = instruction.firstMatch(pattern: CommandPattern.comparisonFunction)!
         let command = instruction[match[1]!]
+        let uuid = UUID().hashValue
         
-        let commandType = ComparisonFunction(name: command, index: index)!
+        let commandType = ComparisonFunction(name: command, index: uuid)!
         return commandType.parse()
     }
     
@@ -422,8 +424,10 @@ extension Parser {
         let match = instruction.firstMatch(pattern: CommandPattern.call)!
         let functionName = instruction[match[1]!]
         let argc = instruction[match[2]!]
+        let uuid = UUID().hashValue
+
         return """
-        @\(functionName)_RA
+        @RA_\(uuid)
         D=A
         @SP
         A=M
@@ -472,7 +476,7 @@ extension Parser {
         M=D
         @\(functionName)
         0;JMP
-        (\(functionName)_RA)
+        (RA_\(uuid))
         """
     }
     
@@ -497,18 +501,20 @@ extension Parser {
         return output
     }
     
-    func parseCallReturn(index: Int) -> String {
+    func parseCallReturn() -> String {
+        let uuid = UUID().hashValue
+        
         return """
         @LCL
         D=M
-        @FRAME\(index)
+        @FRAME_\(uuid)
         M=D
         @5
         D=A
-        @FRAME\(index)
+        @FRAME_\(uuid)
         A=M-D
         D=M
-        @RET\(index)
+        @RET_\(uuid)
         M=D
         @SP
         A=M-1
@@ -520,27 +526,27 @@ extension Parser {
         D=M+1
         @SP
         M=D
-        @FRAME\(index)
+        @FRAME_\(uuid)
         AM=M-1
         D=M
         @THAT
         M=D
-        @FRAME\(index)
+        @FRAME_\(uuid)
         AM=M-1
         D=M
         @THIS
         M=D
-        @FRAME\(index)
+        @FRAME_\(uuid)
         AM=M-1
         D=M
         @ARG
         M=D
-        @FRAME\(index)
+        @FRAME_\(uuid)
         AM=M-1
         D=M
         @LCL
         M=D
-        @RET\(index)
+        @RET_\(uuid)
         A=M
         0;JMP
         """
